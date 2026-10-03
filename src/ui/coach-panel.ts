@@ -1,4 +1,4 @@
-import { Cpu, Power, TriangleAlert } from 'lucide';
+import { ArrowLeftRight, Cpu, Power, TriangleAlert } from 'lucide';
 import { MODELS, formatBytes, type ModelKey } from '../ai/model-config';
 import { webgpuSupported, type CoachState } from '../ai/coach-client';
 import { h, icon } from './dom';
@@ -22,14 +22,17 @@ export function renderCoachPanel(
     return;
   }
 
-  if (state.status === 'off' || state.status === 'error') {
-    const select = h(
+  const modelSelect = (current: ModelKey) =>
+    h(
       'select',
       { class: 'select', 'aria-label': 'Coach model' },
       ...Object.values(MODELS).map((m) =>
-        h('option', { value: m.key, selected: m.key === selected }, `${m.label} · ${formatBytes(m.approxBytes.q4f16)}`),
+        h('option', { value: m.key, selected: m.key === current }, `${m.label} · ${formatBytes(m.approxBytes.q4f16)} · ${m.note}`),
       ),
     );
+
+  if (state.status === 'off' || state.status === 'error') {
+    const select = modelSelect(selected);
     const enable = h(
       'button',
       {
@@ -71,6 +74,21 @@ export function renderCoachPanel(
   }
 
   const speed = state.tokensPerSecond ? ` · ${state.tokensPerSecond.toFixed(1)} tok/s` : '';
+  const select = modelSelect(state.model);
+  const switchBtn = h(
+    'button',
+    {
+      class: 'btn',
+      title: 'Load the selected model instead',
+      disabled: true,
+      onclick: () => handlers.onEnable(select.value as ModelKey),
+    },
+    icon(ArrowLeftRight),
+    'Switch',
+  );
+  select.addEventListener('change', () => {
+    switchBtn.disabled = select.value === state.model;
+  });
   container.replaceChildren(
     heading,
     h(
@@ -80,5 +98,6 @@ export function renderCoachPanel(
       off,
     ),
     h('p', { class: 'coach-meta' }, `${state.dtype}${speed}`),
+    h('div', { class: 'coach-row coach-switch' }, select, switchBtn),
   );
 }

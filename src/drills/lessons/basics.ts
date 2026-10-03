@@ -15,6 +15,9 @@ export const hjkl: LessonDef = {
     { id: 'hjkl-3', prompt: 'Get to "gamma"', start: '‸alpha\nbeta\ngamma', goal: 'alpha\nbeta\n‸gamma', solution: 'jj' },
     { id: 'hjkl-4', prompt: 'Back to the start', start: 'ab‸cdef', goal: '‸abcdef', solution: 'hh' },
     { id: 'hjkl-5', prompt: 'Land on the "r"', start: '‸one\ntwo\nthree', goal: 'one\ntwo\nth‸ree', solution: 'jjll' },
+    { id: 'hjkl-6', prompt: 'Climb to the top', start: 'one\ntwo\nth‸ree', goal: 'on‸e\ntwo\nthree', solution: 'kk' },
+    { id: 'hjkl-7', prompt: 'Down and over', start: '‸ab\ncd\nef', goal: 'ab\ncd\ne‸f', solution: 'jjl' },
+    { id: 'hjkl-8', prompt: 'Back up a line', start: 'first\nsec‸ond', goal: 'fir‸st\nsecond', solution: 'k' },
   ],
 };
 
@@ -33,6 +36,9 @@ export const insert: LessonDef = {
     { id: 'insert-3', prompt: 'Add the missing "w"', start: 'hello ‸orld', goal: 'hello world', solution: 'iw<Esc>' },
     { id: 'insert-4', prompt: 'Say it with feeling', start: 'I ‸vim', goal: 'I love vim', solution: 'ilove <Esc>' },
     { id: 'insert-5', prompt: 'Clean up the junk', start: '‸xxvim', goal: 'vim', solution: 'xx' },
+    { id: 'insert-6', prompt: 'Close the paren', start: 'print("hi‸"', goal: 'print("hi")', solution: 'a)<Esc>' },
+    { id: 'insert-7', prompt: 'Remove the double space', start: 'one ‸ two', goal: 'one two', solution: 'x' },
+    { id: 'insert-8', prompt: 'Spell it right', start: 'w‸rd', goal: 'word', solution: 'io<Esc>' },
   ],
 };
 
@@ -50,6 +56,9 @@ export const words: LessonDef = {
     { id: 'words-3', prompt: 'Land on the end of "quick"', start: '‸the quick brown fox', goal: 'the quic‸k brown fox', solution: 'ee' },
     { id: 'words-4', prompt: 'Upgrade the editor', start: '‸I like vim', goal: 'I like neovim', solution: 'wwineo<Esc>' },
     { id: 'words-5', prompt: 'Make it plural', start: '‸save the file', goal: 'save the files', solution: 'eeeas<Esc>' },
+    { id: 'words-6', prompt: 'Jump to the last word', start: '‸one two three four', goal: 'one two three ‸four', solution: 'www' },
+    { id: 'words-7', prompt: 'Land on the end of "two"', start: '‸one two three', goal: 'one tw‸o three', solution: 'ee' },
+    { id: 'words-8', prompt: 'Make it more fun', start: 'that w‸as fun', goal: 'that was so fun', solution: 'wiso <Esc>' },
   ],
 };
 
@@ -71,5 +80,7 @@ export const lines: LessonDef = {
     { id: 'lines-4', prompt: 'Add a prefix', start: 'b‸ar', goal: 'foobar', solution: 'Ifoo<Esc>' },
     { id: 'lines-5', prompt: 'Add the third item', start: 'item one\n‸item two', goal: 'item one\nitem two\nitem three', solution: 'oitem three<Esc>' },
     { id: 'lines-6', prompt: 'Add a line above', start: '‸second', goal: 'first\nsecond', solution: 'Ofirst<Esc>' },
+    { id: 'lines-7', prompt: 'Wrap it in quotes', start: 'h‸ello', goal: '"hello"', solution: 'I"<Esc>A"<Esc>' },
+    { id: 'lines-8', prompt: 'Add the closing brace', start: '‸if (x) {\nrun()', goal: 'if (x) {\nrun()\n}', solution: 'jo}<Esc>' },
   ],
 };

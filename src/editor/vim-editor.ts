@@ -1,7 +1,7 @@
 import { EditorState, EditorSelection, StateField, type Extension } from '@codemirror/state';
 import { EditorView, Decoration, lineNumbers, drawSelection, type DecorationSet } from '@codemirror/view';
 import { history } from '@codemirror/commands';
-import { vim, getCM } from '@replit/codemirror-vim';
+import { vim, getCM, Vim } from '@replit/codemirror-vim';
 import { snapshot } from '../drills/runner';
 import type { EditorSnapshot } from '../drills/drill-engine';
 import type { Drill } from '../drills/types';
@@ -30,8 +30,14 @@ export function createVimEditor(parent: HTMLElement, onChange: (snap: EditorSnap
   const view = new EditorView({ parent });
 
   const emit = () => onChange(snapshot(view));
+  // A / search moves the cursor while its prompt is still open (and counted as busy),
+  // so check again once the key is released and the prompt has closed.
+  view.dom.addEventListener('keyup', emit);
 
   const load = (drill: Drill) => {
+    // vim keeps search, jump list and registers globally. Positions from the last drill's
+    // buffer would throw in a shorter one, and each drill should start clean anyway.
+    Vim.resetVimGlobalState_();
     view.setState(
       EditorState.create({
         doc: drill.startText,

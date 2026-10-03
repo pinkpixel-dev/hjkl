@@ -47,3 +47,30 @@ describe('describeKeys', () => {
     expect(describeKeys(parseKeys('2dd'))).toBe('2dd (counts repeat a command)');
   });
 });
+
+describe('search and visual mode', () => {
+  test('a search is one group', () => {
+    expect(groups('/fin<CR>n')).toEqual([
+      { kind: 'command', keys: '/fin<CR>', count: 1 },
+      { kind: 'command', keys: 'n', count: 1 },
+    ]);
+    expect(describeKeys(parseKeys('/bu<CR>'))).toBe('/bu<CR> (search)');
+  });
+
+  test('operators in visual mode act on the selection', () => {
+    expect(groups('ved')).toEqual([
+      { kind: 'command', keys: 'v', count: 1 },
+      { kind: 'command', keys: 'e', count: 1 },
+      { kind: 'command', keys: 'd', count: 1 },
+    ]);
+    expect(groups('veecbye<Esc>').slice(2)).toEqual([
+      { kind: 'command', keys: 'c', count: 1 },
+      { kind: 'typed', text: 'bye' },
+      { kind: 'command', keys: '<Esc>', count: 1 },
+    ]);
+  });
+
+  test('i inside visual mode is not insert', () => {
+    expect(groups('viwU').map((g) => (g.kind === 'command' ? g.keys : g.text))).toEqual(['v', 'i', 'w', 'U']);
+  });
+});

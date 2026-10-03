@@ -5,21 +5,39 @@ import { vim, getCM, Vim } from '@replit/codemirror-vim';
 import { isSolved, type EditorSnapshot } from './drill-engine';
 import type { Drill } from './types';
 
-type VimCM = NonNullable<ReturnType<typeof getCM>>;
-
 /** Read text, cursor and mode from a live vim editor. */
 export function snapshot(view: EditorView): EditorSnapshot {
   const vimState = getCM(view)?.state.vim;
   return {
     text: view.state.doc.toString(),
     cursor: view.state.selection.main.head,
-    busy: Boolean(vimState?.insertMode || vimState?.visualMode),
+    // An open / or : prompt counts as busy so a search preview can't finish a drill early.
+    busy: Boolean(vimState?.insertMode || vimState?.visualMode || view.dom.querySelector('.cm-vim-panel input')),
   };
 }
 
-/** Feed keys through vim the same way a keyboard would. */
-export function runKeys(cm: VimCM, keys: string[]): void {
+/** Presses a key on the vim prompt input (/, ?, :). The prompt listens for legacy keyCode. */
+function pressPromptKey(input: HTMLInputElement, keyCode: number) {
+  const e = new KeyboardEvent('keydown', { bubbles: true, cancelable: true });
+  Object.defineProperty(e, 'keyCode', { get: () => keyCode });
+  input.dispatchEvent(e);
+}
+
+/** Feed keys through vim the same way a keyboard would, including typing into the / prompt. */
+export function runKeys(view: EditorView, keys: string[]): void {
+  const cm = getCM(view);
+  if (!cm) return;
   for (const key of keys) {
+    const prompt = view.dom.querySelector<HTMLInputElement>('.cm-vim-panel input');
+    if (prompt) {
+      if (key === '<CR>') pressPromptKey(prompt, 13);
+      else if (key === '<Esc>') pressPromptKey(prompt, 27);
+      else if (key.length === 1) {
+        prompt.value += key;
+        prompt.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      continue;
+    }
     const handled = Vim.handleKey(cm, key, 'user');
     if (handled || !cm.state.vim?.insertMode) continue;
     if (key === '<CR>') cm.replaceSelection('\n');
@@ -45,9 +63,7 @@ export function verifyDrill(drill: Drill, keys: string[] = drill.solution): bool
     }),
   });
   try {
-    const cm = getCM(view);
-    if (!cm) return false;
-    runKeys(cm, keys);
+    runKeys(view, keys);
     return isSolved(drill, snapshot(view));
   } finally {
     view.destroy();

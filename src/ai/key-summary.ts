@@ -7,6 +7,8 @@ const MEANING = new Map(LESSONS.flatMap((l) => l.commands.map((c) => [c.keys, c.
 const INSERT_ENTRY = new Set(['i', 'a', 'I', 'A', 'o', 'O', 's', 'S', 'C']);
 const OPERATORS = new Set(['d', 'c', 'y']);
 const CHAR_ARG = new Set(['f', 'F', 't', 'T', 'r']);
+const SEARCH = new Set(['/', '?']);
+const VISUAL_ENTRY = new Set(['v', 'V']);
 
 /**
  * Splits raw keys into vim-shaped groups: `cw`, `f,` and `2dd` stay whole, and
@@ -33,13 +35,23 @@ export function groupKeys(keys: readonly string[]): KeyGroup[] {
     if (text) groups.push({ kind: 'typed', text });
   };
 
+  let visual = false;
   while (i < keys.length) {
     let cmd = '';
     while (/^[1-9]$/.test(keys[i] ?? '') || (cmd && keys[i] === '0')) cmd += take();
     const key = take();
     cmd += key;
 
-    if (OPERATORS.has(key)) {
+    if (SEARCH.has(key)) {
+      // `/fin<CR>` is one search, not four keys.
+      while (i < keys.length && keys[i] !== '<CR>' && keys[i] !== '<Esc>') cmd += take();
+      push(cmd + take());
+    } else if (visual && (OPERATORS.has(key) || key === 'U' || key === '>' || key === '<')) {
+      // In visual mode operators act on the selection right away.
+      visual = false;
+      push(cmd);
+      if (key === 'c') typeUntilEsc();
+    } else if (OPERATORS.has(key)) {
       while (/^[0-9]$/.test(keys[i] ?? '')) cmd += take(); // inner count, as in d2w
       const motion = take();
       cmd += motion;
@@ -50,7 +62,9 @@ export function groupKeys(keys: readonly string[]): KeyGroup[] {
       push(cmd + take());
     } else {
       push(cmd);
-      if (INSERT_ENTRY.has(key)) typeUntilEsc();
+      if (VISUAL_ENTRY.has(key)) visual = true;
+      else if (key === '<Esc>') visual = false;
+      else if (!visual && INSERT_ENTRY.has(key)) typeUntilEsc();
     }
   }
   return groups;
@@ -62,7 +76,7 @@ export function describeKeys(keys: readonly string[]): string {
   return groupKeys(keys)
     .map((g) => {
       if (g.kind === 'typed') return `typed ${JSON.stringify(g.text)}`;
-      const meaning = MEANING.get(g.keys) ?? MEANING.get(g.keys.replace(/^\d+/, ''));
+      const meaning = MEANING.get(g.keys) ?? MEANING.get(g.keys.replace(/^\d+/, '')) ?? (SEARCH.has(g.keys[0]) ? 'search' : undefined);
       return `${g.keys}${g.count > 1 ? ` ×${g.count}` : ''}${meaning ? ` (${meaning})` : ''}`;
     })
     .join(', ');

@@ -15,6 +15,9 @@ export const deleting: LessonDef = {
     { id: 'delete-3', prompt: 'Drop the comment', start: 'done;‸ // old', goal: 'done;', solution: 'D' },
     { id: 'delete-4', prompt: 'Delete two words', start: '‸a b c d', goal: 'c d', solution: 'd2w' },
     { id: 'delete-5', prompt: 'Delete two lines', start: 'one\n‸two\nthree\nfour', goal: 'one\nfour', solution: '2dd' },
+    { id: 'delete-6', prompt: 'Delete the extra word', start: 'one ‸extra two', goal: 'one two', solution: 'dw' },
+    { id: 'delete-7', prompt: 'Delete three lines', start: '‸a\nb\nc\nd', goal: 'd', solution: '3dd' },
+    { id: 'delete-8', prompt: 'Cut the filler', start: 'this is ‸really very cool', goal: 'this is cool', solution: 'd2w' },
   ],
 };
 
@@ -34,6 +37,9 @@ export const change: LessonDef = {
     { id: 'change-3', prompt: 'Rename them', start: 'name = "Al‸ex"', goal: 'name = "Sam"', solution: 'ci"Sam<Esc>' },
     { id: 'change-4', prompt: 'Empty the call', start: 'print(‸"hi")', goal: 'print()', solution: 'ci(<Esc>' },
     { id: 'change-5', prompt: 'Replace the value', start: 'x = ‸old value', goal: 'x = 42', solution: 'C42<Esc>' },
+    { id: 'change-6', prompt: 'Change the port', start: 'port = ‸3000', goal: 'port = 8080', solution: 'cw8080<Esc>' },
+    { id: 'change-7', prompt: 'Change the index', start: 'list[‸old]', goal: 'list[new]', solution: 'ci[new<Esc>' },
+    { id: 'change-8', prompt: 'Rewrite the status', start: 'status: ‸broken stuff', goal: 'status: ok', solution: 'Cok<Esc>' },
   ],
 };
 
@@ -53,6 +59,9 @@ export const paste: LessonDef = {
     { id: 'paste-3', prompt: 'Fix the swapped letters', start: 't‸eh', goal: 'the', solution: 'xp' },
     { id: 'paste-4', prompt: 'Make it all new', start: '‸old old old', goal: 'new new new', solution: 'cwnew<Esc>w.w.' },
     { id: 'paste-5', prompt: 'Delete two lines, the dot way', start: '‸1\n2\n3\n4', goal: '3\n4', solution: 'dd.' },
+    { id: 'paste-6', prompt: 'Make three rows', start: '‸row', goal: 'row\nrow\nrow', solution: 'yypp' },
+    { id: 'paste-7', prompt: 'Move the line down', start: '‸first\nsecond\nthird', goal: 'second\nfirst\nthird', solution: 'ddp' },
+    { id: 'paste-8', prompt: 'Make them all "y"', start: '‸x x x', goal: 'y y y', solution: 'cwy<Esc>w.w.' },
   ],
 };
 
@@ -70,5 +79,8 @@ export const find: LessonDef = {
     { id: 'find-3', prompt: 'Delete up to the colon', start: '‸delete until here: keep', goal: ': keep', solution: 'dt:' },
     { id: 'find-4', prompt: 'Cut everything after the name', start: '‸name: x, age: y', goal: 'name: x', solution: 'f,D' },
     { id: 'find-5', prompt: 'Change the condition', start: '‸if (ready) {', goal: 'if (done) {', solution: 'f(ci(done<Esc>' },
+    { id: 'find-6', prompt: 'Stop just before the paren', start: '‸call(x)', goal: 'cal‸l(x)', solution: 't(' },
+    { id: 'find-7', prompt: 'Change everything up to the comma', start: '‸old stuff here, keep', goal: 'new, keep', solution: 'ct,new<Esc>' },
+    { id: 'find-8', prompt: 'Delete through the colon', start: '‸key:value', goal: 'value', solution: 'df:' },
   ],
 };

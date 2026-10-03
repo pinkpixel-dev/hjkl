@@ -6,12 +6,13 @@ I'm building it for my husband. He uses VS Code every day, and he's tried to lea
 
 ## What's in it right now
 
-- 8 lessons and 41 hand-written drills, covering movement, insert mode, word and line jumps, delete, change, copy and paste, dot-repeat, and `f`/`t` finds
+- 10 lessons and 74 hand-written drills, covering movement, insert mode, word and line jumps, delete, change, copy and paste, dot-repeat, `f`/`t` finds, search, and visual mode
 - A real vim editor in the browser (CodeMirror 6 with `@replit/codemirror-vim`)
 - Two kinds of drills: move the cursor to a highlighted character, or edit the buffer until it matches the goal
 - A live keystroke counter with every key you press, graded against par
 - The reference solution after each drill, so you can see the shorter path
 - A cheat sheet for the current lesson with the closest VS Code shortcut for each command
+- A Review list at the top of the sidebar with every drill you've solved but not at par yet, worst first. Hit par and it drops off.
 - Progress saved in your browser, so you pick up where you left off
 
 Every drill's reference solution is run through the real vim engine in the test suite, so par is always something you can actually hit.
@@ -21,7 +22,9 @@ Every drill's reference solution is run through the real vim engine in the test 
 The coach is optional and off by default. Turn it on from the sidebar and it downloads a Gemma model once, then runs it on your GPU right in the browser through WebGPU. The model files come from Hugging Face, but your keystrokes and the coach's prompts never leave your browser.
 
 - **Gemma 4 E2B** is the default. It's about 3.1 GB, or 3.6 GB if your browser doesn't support fp16 shaders.
-- **Gemma 3 1B** is the lighter option at under 1 GB, if the big one is too slow on your machine.
+- **Gemma 3 1B** is the lighter option at under 1 GB. It's faster (about 10 tokens a second vs 6 to 7 on my machine), but its explanations are a lot shakier. It sometimes describes commands wrong.
+
+Pick one before you hit **Enable**. If the coach is already on, choose the other model and hit **Switch**.
 
 Once it's loaded:
 
@@ -60,7 +63,6 @@ Edit drills only count as solved once you're back in normal mode, so finish with
 ## Known quirks
 
 - `dd` on the last line followed by `P` leaves an extra blank line. That's a bug in the vim plugin, not in your keystrokes. Real vim doesn't do this. None of the drills depend on it.
-- Search (`/`) works in the editor, but no drills use it yet.
 
 ## License
 

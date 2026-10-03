@@ -467,3 +467,27 @@ button:focus-visible {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Review entry */
+.lesson-review {
+  margin-bottom: 1.25rem;
+  border-color: var(--border);
+}
+
+.lesson-review .lesson-num {
+  color: var(--goal);
+  border-color: var(--goal);
+}
+
+.lesson:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.lesson:disabled:hover {
+  background: none;
+}
+
+.coach-switch {
+  margin-top: 0.9rem;
+}

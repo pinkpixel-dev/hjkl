@@ -1,7 +1,7 @@
 import { ArrowRight, Eye, Lightbulb, RotateCcw } from 'lucide';
 import { displayKey } from '../drills/keys';
 import { grade, type Grade } from '../drills/drill-engine';
-import type { Drill, Lesson } from '../drills/types';
+import type { Drill } from '../drills/types';
 import { h, icon, keyChips } from './dom';
 import { renderGoal } from './goal-view';
 import { CoachOutput } from './coach-output';
@@ -79,10 +79,11 @@ export class DrillView {
     );
   }
 
-  show(lesson: Lesson, lessonIndex: number, drillIndex: number, bestById: Record<string, number>): void {
-    const drill = lesson.drills[drillIndex];
+  /** `drills` is the current set (a lesson, or the review queue); `crumb` labels where we are. */
+  show(drills: Drill[], crumb: string, drillIndex: number, bestById: Record<string, number>): void {
+    const drill = drills[drillIndex];
     this.drill = drill;
-    this.crumbs.textContent = `Lesson ${lessonIndex + 1} · ${lesson.title}`;
+    this.crumbs.textContent = crumb;
     this.heading.textContent = drill.prompt;
     this.goalSlot.replaceChildren(renderGoal(drill));
     this.result.hidden = true;
@@ -91,7 +92,7 @@ export class DrillView {
     this.coach.clear();
     this.answer.replaceChildren(h('span', { class: 'faint' }, 'Reference'), keyChips(drill.solution, displayKey));
     this.pager.replaceChildren(
-      ...lesson.drills.map((d, i) =>
+      ...drills.map((d, i) =>
         h('button', {
           class: `dot${i === drillIndex ? ' is-current' : ''}${bestById[d.id] !== undefined ? ' is-done' : ''}`,
           title: `Drill ${i + 1}: ${d.prompt}`,

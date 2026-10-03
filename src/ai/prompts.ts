@@ -4,6 +4,7 @@ import type { ChatMessage } from './protocol';
 
 const SYSTEM = [
   'You are a friendly vim coach. The learner uses VS Code every day and is new to vim.',
+  'Talk to the learner directly as "you".',
   'Reply in one or two short sentences of plain text. No lists, no headings, no greetings.',
   'Wrap every vim key or command in backticks, like `ciw` or `<Esc>`.',
   'Only mention standard vim commands. Never invent commands.',

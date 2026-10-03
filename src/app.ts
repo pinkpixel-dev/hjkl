@@ -1,8 +1,10 @@
 import { LESSONS } from './drills/lessons';
 import { grade, isSolved, type EditorSnapshot } from './drills/drill-engine';
+import type { Drill, Lesson } from './drills/types';
 import { createVimEditor } from './editor/vim-editor';
 import { KeystrokeTracker } from './editor/keystroke-tracker';
 import { loadCoachPrefs, loadProgress, recordSolve, saveCoachPrefs, saveProgress } from './progress/store';
+import { buildReview } from './progress/review';
 import { CoachClient } from './ai/coach-client';
 import { DEFAULT_MODEL, MODELS, type ModelKey } from './ai/model-config';
 import { feedbackMessages, hintMessages } from './ai/prompts';
@@ -13,16 +15,28 @@ import { renderCheatsheet } from './ui/cheatsheet';
 import { renderCoachPanel } from './ui/coach-panel';
 import { h } from './ui/dom';
 
+/** Where the learner is: a lesson index, or the review queue. */
+type Place = number | 'review';
+
+const homeLesson = (drill: Drill): Lesson => LESSONS.find((l) => l.id === drill.lessonId)!;
+
 export function startApp(root: HTMLElement): void {
   const progress = loadProgress();
   const coachPrefs = loadCoachPrefs();
   const coach = new CoachClient();
   let coachModel: ModelKey = coachPrefs.model && coachPrefs.model in MODELS ? (coachPrefs.model as ModelKey) : DEFAULT_MODEL;
 
-  const startLesson = Math.max(0, LESSONS.findIndex((l) => l.id === progress.last?.lessonId));
-  let lessonIndex = startLesson;
-  let drillIndex = Math.min(progress.last?.drillIndex ?? 0, LESSONS[startLesson].drills.length - 1);
+  // The review queue is a snapshot for this pass, so drills don't vanish while you work through it.
+  let reviewDrills: Drill[] = buildReview(LESSONS, progress.best);
+  const lastId = progress.last?.lessonId;
+  let place: Place =
+    lastId === 'review' && reviewDrills.length ? 'review' : Math.max(0, LESSONS.findIndex((l) => l.id === lastId));
+  let drillIndex = 0;
   let solved = false;
+
+  const drillsAt = (p: Place) => (p === 'review' ? reviewDrills : LESSONS[p].drills);
+  drillIndex = Math.min(progress.last?.drillIndex ?? 0, drillsAt(place).length - 1);
+  const current = () => drillsAt(place)[drillIndex];
 
   const sidebar = h('nav', { class: 'sidebar', 'aria-label': 'Lessons' });
   const cheatsheetSlot = h('div', {});
@@ -31,18 +45,16 @@ export function startApp(root: HTMLElement): void {
   const score = h('span', { class: 'score' });
 
   const view = new DrillView({
-    onReset: () => openDrill(lessonIndex, drillIndex),
-    onPick: (i) => openDrill(lessonIndex, i),
+    onReset: () => openDrill(place, drillIndex),
+    onPick: (i) => openDrill(place, i),
     onNext: () => next(),
-    onHint: () => askCoach(hintMessages(current(), LESSONS[lessonIndex], tracker.recorded), 80),
+    onHint: () => askCoach(hintMessages(current(), homeLesson(current()), tracker.recorded), 80),
   });
 
   root.replaceChildren(
     h('header', { class: 'topbar' }, h('span', { class: 'logo' }, 'hjkl'), score),
     h('div', { class: 'layout' }, sidebar, h('main', { class: 'main' }, view.root), h('aside', { class: 'aside' }, cheatsheetSlot, coachSlot)),
   );
-
-  const current = () => LESSONS[lessonIndex].drills[drillIndex];
 
   // Asking again aborts the previous reply, which then resolves late. Only the newest may touch the view.
   let askSeq = 0;
@@ -71,52 +83,73 @@ export function startApp(root: HTMLElement): void {
   });
 
   const onChange = (snap: EditorSnapshot) => {
-    if (solved || !isSolved(current(), snap)) return;
+    const drill = current();
+    if (solved || !isSolved(drill, snap)) return;
     solved = true;
     tracker.stop();
     const keys = tracker.recorded;
-    const newBest = recordSolve(progress, current().id, keys.length);
+    const newBest = recordSolve(progress, drill.id, keys.length);
     saveProgress(progress);
     view.showResult(keys, newBest);
     refreshChrome();
     // Only explain when there was a shorter path. At or under par there's nothing to fix.
-    if (grade(keys.length, current().par) === 'over') {
-      askCoach(feedbackMessages(current(), LESSONS[lessonIndex], keys));
-    }
+    if (grade(keys.length, drill.par) === 'over') askCoach(feedbackMessages(drill, homeLesson(drill), keys));
   };
 
   const editor = createVimEditor(view.editorSlot, onChange);
   const tracker = new KeystrokeTracker(editor.view.dom, (keys) => view.updateKeys(keys));
 
   function refreshChrome() {
-    const lesson = LESSONS[lessonIndex];
-    renderSidebar(sidebar, LESSONS, progress, lesson.id, (i) => openDrill(i, 0));
-    renderCheatsheet(cheatsheetSlot, lesson);
+    const drill = current();
+    const reviewCount = buildReview(LESSONS, progress.best).length;
+    const currentId = place === 'review' ? 'review' : LESSONS[place].id;
+    renderSidebar(sidebar, LESSONS, progress, currentId, reviewCount, (i) => openDrill(i, 0), openReview);
+    renderCheatsheet(cheatsheetSlot, homeLesson(drill));
     score.textContent = `${Object.keys(progress.best).length} / ${total} solved`;
   }
 
-  function openDrill(li: number, di: number) {
+  function crumb(p: Place, drill: Drill): string {
+    if (p === 'review') return `Review · ${homeLesson(drill).title}`;
+    return `Lesson ${p + 1} · ${LESSONS[p].title}`;
+  }
+
+  function openDrill(p: Place, di: number) {
     coach.abort();
-    lessonIndex = li;
+    place = p;
     drillIndex = di;
     solved = false;
-    progress.last = { lessonId: LESSONS[li].id, drillIndex: di };
+    const drill = current();
+    progress.last = { lessonId: p === 'review' ? 'review' : LESSONS[p].id, drillIndex: di };
     saveProgress(progress);
-    view.show(LESSONS[li], li, di, progress.best);
-    editor.load(current());
+    view.show(drillsAt(p), crumb(p, drill), di, progress.best);
+    editor.load(drill);
     tracker.start();
     refreshChrome();
     editor.focus();
   }
 
-  function next() {
-    const lesson = LESSONS[lessonIndex];
-    if (drillIndex + 1 < lesson.drills.length) openDrill(lessonIndex, drillIndex + 1);
-    else if (lessonIndex + 1 < LESSONS.length) openDrill(lessonIndex + 1, 0);
-    else openDrill(0, 0);
+  /** Starts a fresh pass over everything still over par. */
+  function openReview() {
+    reviewDrills = buildReview(LESSONS, progress.best);
+    if (reviewDrills.length) openDrill('review', 0);
   }
 
-  openDrill(lessonIndex, drillIndex);
+  function firstUnfinishedLesson(): number {
+    const i = LESSONS.findIndex((l) => l.drills.some((d) => progress.best[d.id] === undefined));
+    return Math.max(0, i);
+  }
+
+  function next() {
+    if (drillIndex + 1 < drillsAt(place).length) return openDrill(place, drillIndex + 1);
+    if (place === 'review') {
+      // End of the pass: go again if anything is still over par, otherwise back to lessons.
+      reviewDrills = buildReview(LESSONS, progress.best);
+      return reviewDrills.length ? openDrill('review', 0) : openDrill(firstUnfinishedLesson(), 0);
+    }
+    openDrill(place + 1 < LESSONS.length ? place + 1 : 0, 0);
+  }
+
+  openDrill(place, drillIndex);
   // The model is cached after the first download, so turning it back on is much quicker.
   if (coachPrefs.enabled) coach.enable(coachModel);
 }
