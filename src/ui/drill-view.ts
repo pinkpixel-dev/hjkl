@@ -1,9 +1,10 @@
-import { ArrowRight, Eye, RotateCcw } from 'lucide';
+import { ArrowRight, Eye, Lightbulb, RotateCcw } from 'lucide';
 import { displayKey } from '../drills/keys';
 import { grade, type Grade } from '../drills/drill-engine';
 import type { Drill, Lesson } from '../drills/types';
 import { h, icon, keyChips } from './dom';
 import { renderGoal } from './goal-view';
+import { CoachOutput } from './coach-output';
 
 const GRADE_TEXT: Record<Grade, string> = {
   under: 'Under par. Nice.',
@@ -15,6 +16,7 @@ export interface DrillViewHandlers {
   onReset(): void;
   onNext(): void;
   onPick(drillIndex: number): void;
+  onHint(): void;
 }
 
 /** The center panel: prompt, editor slot, goal, live keys and result. */
@@ -29,7 +31,9 @@ export class DrillView {
   private liveKeys = h('div', { class: 'live-keys' });
   private result = h('section', { class: 'result', 'aria-live': 'polite', hidden: true });
   private answer = h('div', { class: 'answer', hidden: true });
+  readonly coach = new CoachOutput();
   private nextBtn: HTMLButtonElement;
+  private hintBtn: HTMLButtonElement;
   private drill: Drill | null = null;
 
   constructor(private handlers: DrillViewHandlers) {
@@ -44,6 +48,12 @@ export class DrillView {
       { class: 'btn', title: 'Start this drill over', onclick: () => handlers.onReset() },
       icon(RotateCcw),
       'Reset',
+    );
+    this.hintBtn = h(
+      'button',
+      { class: 'btn', title: 'Ask the coach for a nudge', hidden: true, onclick: () => handlers.onHint() },
+      icon(Lightbulb),
+      'Hint',
     );
     const answerBtn = h(
       'button',
@@ -62,9 +72,10 @@ export class DrillView {
         h('section', { class: 'pane' }, h('h2', { class: 'pane-label' }, 'Buffer'), this.editorSlot),
         h('section', { class: 'pane' }, h('h2', { class: 'pane-label' }, 'Goal'), this.goalSlot),
       ),
-      h('div', { class: 'keybar' }, this.counter, this.liveKeys, h('div', { class: 'actions' }, answerBtn, resetBtn)),
+      h('div', { class: 'keybar' }, this.counter, this.liveKeys, h('div', { class: 'actions' }, this.hintBtn, answerBtn, resetBtn)),
       this.answer,
       this.result,
+      this.coach.root,
     );
   }
 
@@ -76,6 +87,8 @@ export class DrillView {
     this.goalSlot.replaceChildren(renderGoal(drill));
     this.result.hidden = true;
     this.answer.hidden = true;
+    this.hintBtn.disabled = false;
+    this.coach.clear();
     this.answer.replaceChildren(h('span', { class: 'faint' }, 'Reference'), keyChips(drill.solution, displayKey));
     this.pager.replaceChildren(
       ...lesson.drills.map((d, i) =>
@@ -114,7 +127,13 @@ export class DrillView {
     this.result.hidden = false;
     this.answer.hidden = true;
     this.pager.querySelector('.dot.is-current')?.classList.add('is-done');
+    this.hintBtn.disabled = true;
     this.nextBtn.focus();
+  }
+
+  setCoachReady(ready: boolean): void {
+    this.hintBtn.hidden = !ready;
+    if (!ready) this.coach.clear();
   }
 
   private toggleAnswer(): void {

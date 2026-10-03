@@ -334,3 +334,136 @@ button:focus-visible {
     transition: none !important;
   }
 }
+
+/* Coach */
+.coach-panel {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.coach-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.coach-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.coach-progress {
+  width: 100%;
+  height: 6px;
+  margin-bottom: 0.6rem;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.coach-progress::-webkit-progress-bar {
+  background: var(--surface-2);
+}
+
+.coach-progress::-webkit-progress-value {
+  background: var(--accent);
+}
+
+.coach-progress::-moz-progress-bar {
+  background: var(--accent);
+}
+
+.coach-meta {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--faint);
+}
+
+.coach-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.coach-error {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--over);
+}
+
+.coach-error svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.coach-output {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.coach-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.coach-text {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.coach-output.is-busy .coach-label svg {
+  animation: coach-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes coach-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

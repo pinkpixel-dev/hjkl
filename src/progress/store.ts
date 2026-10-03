@@ -32,3 +32,27 @@ export function recordSolve(progress: Progress, drillId: string, keyCount: numbe
   progress.best[drillId] = keyCount;
   return true;
 }
+
+const COACH_KEY = 'hjkl:coach:v1';
+
+export interface CoachPrefs {
+  enabled: boolean;
+  model: string | null;
+}
+
+export function loadCoachPrefs(): CoachPrefs {
+  try {
+    const raw = localStorage.getItem(COACH_KEY);
+    return raw ? { enabled: false, model: null, ...JSON.parse(raw) } : { enabled: false, model: null };
+  } catch {
+    return { enabled: false, model: null };
+  }
+}
+
+export function saveCoachPrefs(prefs: CoachPrefs): void {
+  try {
+    localStorage.setItem(COACH_KEY, JSON.stringify(prefs));
+  } catch {
+    // Not critical: the coach just won't auto-start next time.
+  }
+}

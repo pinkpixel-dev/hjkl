@@ -16,7 +16,21 @@ I'm building it for my husband. He uses VS Code every day, and he's tried to lea
 
 Every drill's reference solution is run through the real vim engine in the test suite, so par is always something you can actually hit.
 
-An optional AI coach that runs Gemma locally in your browser is next on the list. See [DOCS/ROADMAP.md](DOCS/ROADMAP.md).
+## The AI coach
+
+The coach is optional and off by default. Turn it on from the sidebar and it downloads a Gemma model once, then runs it on your GPU right in the browser through WebGPU. The model files come from Hugging Face, but your keystrokes and the coach's prompts never leave your browser.
+
+- **Gemma 4 E2B** is the default. It's about 3.1 GB, or 3.6 GB if your browser doesn't support fp16 shaders.
+- **Gemma 3 1B** is the lighter option at under 1 GB, if the big one is too slow on your machine.
+
+Once it's loaded:
+
+- If you solve a drill over par, it explains what the shorter answer does differently.
+- The **Hint** button gives you a nudge toward the right command without spelling out the full answer.
+
+After the first download, the model comes from the browser cache, so turning it back on is a lot quicker. On my machine (an NVIDIA Ada Lovelace GPU, using the `q4` weights), Gemma 4 E2B writes about 6 to 7 tokens a second, so a reply takes a few seconds.
+
+The coach needs a browser with WebGPU, like a recent Chrome or Edge. On Linux, you may need to launch Chrome with WebGPU enabled.
 
 ## Running it
 
