@@ -1,0 +1,28 @@
+:root {
+  color-scheme: dark;
+
+  --bg: oklch(0.185 0.006 255);
+  --surface: oklch(0.215 0.007 255);
+  --surface-2: oklch(0.25 0.008 255);
+  --border: oklch(0.31 0.009 255);
+  --border-strong: oklch(0.4 0.01 255);
+  --text: oklch(0.965 0.003 255);
+  --muted: oklch(0.74 0.01 255);
+  --faint: oklch(0.56 0.01 255);
+  --texture: oklch(0.27 0.008 255);
+
+  --accent: oklch(0.84 0.17 142);
+  --accent-ink: oklch(0.22 0.04 142);
+  --goal: oklch(0.83 0.13 80);
+  --goal-bg: oklch(0.83 0.13 80 / 0.14);
+  --over: oklch(0.75 0.14 45);
+  --selection: oklch(0.84 0.17 142 / 0.22);
+  --focus: oklch(0.84 0.17 142 / 0.75);
+
+  --font-sans: 'Geist', ui-sans-serif, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --radius: 8px;
+  --radius-sm: 5px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
