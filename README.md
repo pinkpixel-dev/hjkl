@@ -1,10 +1,12 @@
-# hjkl
+<p align="center">
+<img src="https://raw.githubusercontent.com/pinkpixel-dev/hjkl/main/hjkl.png" alt="hjkl" width="400">
+</p>
 
 hjkl is a browser app for learning vim through short drills. Each drill gives you a tiny buffer, a goal, and a keystroke par to beat, and you solve it in a real vim editor.
 
-I'm building it for my husband. He uses VS Code every day, and he's tried to learn vim a few times, but it always ends the same way: too many commands to remember, and everything feels slow and awkward compared to what his hands already know. So instead of one long tutorial, hjkl teaches two or three commands at a time, shows the VS Code habit each one replaces, and lets you practice until it sticks.
+I'm building it for my husband. He's tried to learn vim a few times, but it always ends the same way: too many commands to remember, and everything feels slow and awkward compared to what his hands already know. So instead of one long tutorial, hjkl teaches two or three commands at a time, shows the VS Code style habit each one replaces, and lets you practice until it sticks.
 
-Try it at **https://hjkl.pinkpixel.dev** (desktop browser with a keyboard).
+Try it at **https://hjkl.pinkpixel.dev**
 
 ## What's in it right now
 
