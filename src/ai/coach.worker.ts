@@ -56,7 +56,12 @@ async function load(key: keyof typeof MODELS) {
   post({ type: 'ready' });
 }
 
-async function generate(id: number, messages: Parameters<PreTrainedTokenizer['apply_chat_template']>[0], maxTokens: number) {
+async function generate(
+  id: number,
+  messages: Parameters<PreTrainedTokenizer['apply_chat_template']>[0],
+  maxTokens: number,
+  sample: boolean,
+) {
   if (!tokenizer || !model) return;
   stopping.reset();
   const inputs = tokenizer.apply_chat_template(messages, { add_generation_prompt: true, return_dict: true }) as Record<string, unknown>;
@@ -76,7 +81,8 @@ async function generate(id: number, messages: Parameters<PreTrainedTokenizer['ap
   await model.generate({
     ...inputs,
     max_new_tokens: maxTokens,
-    do_sample: false,
+    do_sample: sample,
+    ...(sample ? { temperature: 0.9, top_p: 0.95 } : {}),
     streamer,
     stopping_criteria: stopping,
   });
@@ -93,7 +99,7 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     stopping.interrupt();
     return;
   }
-  const run = msg.type === 'load' ? () => load(msg.model) : () => generate(msg.id, msg.messages, msg.maxTokens);
+  const run = msg.type === 'load' ? () => load(msg.model) : () => generate(msg.id, msg.messages, msg.maxTokens, msg.sample);
   queue = queue.then(run).catch((err) => {
     post({ type: 'error', fatal: msg.type === 'load', message: err instanceof Error ? err.message : String(err) });
   });

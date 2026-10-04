@@ -26,6 +26,12 @@ The coach is optional and off by default. Turn it on from the sidebar and it dow
 
 Pick one before you hit **Enable**. If the coach is already on, choose the other model and hit **Switch**.
 
+### More drills
+
+Once the coach is on, every lesson gets a **5 more** button next to the drill dots. Gemma writes a fresh little snippet (a config line, a shopping list, a SQL query), and the app reuses the key patterns from that lesson's hand-written drills on it. Every new drill gets played through real vim before it shows up, so the goal and par are always right. Gemma also writes the short instruction, and if its wording doesn't match what actually changes, the app swaps in a plain one like `Change "red" to "blue"`.
+
+New drills show up one at a time with dashed dots, and they're saved in your browser. A batch of 5 takes me about 15 to 20 seconds with Gemma 4 E2B. If you finish a drill over par while a batch is running, the coach's feedback goes first and the batch picks up after.
+
 Once it's loaded:
 
 - If you solve a drill over par, it explains what the shorter answer does differently.
@@ -52,6 +58,7 @@ Other scripts:
 npm test          # runs every drill solution through real vim
 npm run build     # typecheck and production build into dist/
 npm run preview   # serve the production build
+npm run deploy    # build and deploy to Cloudflare with wrangler
 ```
 
 ## How to use it
@@ -59,6 +66,16 @@ npm run preview   # serve the production build
 Click into the buffer and use vim keys. The goal pane on the right shows what you're aiming for: a highlighted character for movement drills, or the changed lines for edit drills.
 
 Edit drills only count as solved once you're back in normal mode, so finish with `<Esc>` like you would in real vim. When you solve one, press Enter to move to the next drill. **Reset** starts the drill over, and **Answer** shows the reference keys if you're stuck.
+
+## Deploying
+
+hjkl is a static site, so it deploys to Cloudflare Workers static assets with the `wrangler.jsonc` in the repo. Log in once with `npx wrangler login`, then run `npm run deploy`.
+
+ONNX Runtime's wasm file (about 27 MB) is left out of the build on purpose. It's over Cloudflare's 25 MiB per-file limit, and Transformers.js loads it from jsDelivr anyway, pinned to the exact `onnxruntime-web` version.
+
+## Special keys
+
+Keys like `<CR>` and `<Esc>` are vim's own notation. Everywhere they show up in the app, the plain name sits underneath: `<CR>` is Enter, `<Esc>` is Escape, `<BS>` is Backspace.
 
 ## Known quirks
 

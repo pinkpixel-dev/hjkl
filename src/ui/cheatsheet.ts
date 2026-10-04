@@ -1,12 +1,12 @@
 import type { Lesson } from '../drills/types';
-import { h } from './dom';
+import { h, keyChip } from './dom';
 
 export function renderCheatsheet(container: HTMLElement, lesson: Lesson): void {
   const rows = lesson.commands.map((c) =>
     h(
       'tr',
       {},
-      h('td', {}, h('kbd', {}, c.keys)),
+      h('td', {}, keyChip(c.keys)),
       h('td', { class: 'cmd-name' }, c.name),
       h('td', { class: 'cmd-vscode' }, c.vscode ?? h('span', { class: 'faint', title: 'No VS Code equivalent' }, '—')),
     ),

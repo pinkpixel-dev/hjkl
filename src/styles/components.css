@@ -491,3 +491,61 @@ button:focus-visible {
 .coach-switch {
   margin-top: 0.9rem;
 }
+
+/* Special keys show vim notation with a plain name underneath */
+.kbd-named {
+  flex-direction: column;
+  line-height: 1.15;
+  padding-top: 0.15em;
+  padding-bottom: 0.1em;
+}
+
+.kbd-named small {
+  font-family: var(--font-sans);
+  font-size: 0.68em;
+  color: var(--muted);
+}
+
+.chips {
+  align-items: flex-start;
+}
+
+/* Pager + more drills */
+.pager-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  max-width: 100%;
+}
+
+.pager {
+  flex-wrap: wrap;
+}
+
+.dot.is-ai {
+  border-style: dashed;
+  border-color: var(--goal);
+}
+
+.dot.is-ai.is-done {
+  background: var(--goal);
+  border-style: solid;
+}
+
+.btn-ghost {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: transparent;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+}
+
+.more-btn.is-running {
+  color: var(--goal);
+  border-color: var(--goal);
+}

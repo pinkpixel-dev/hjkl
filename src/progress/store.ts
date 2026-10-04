@@ -1,3 +1,5 @@
+import type { DrillDef } from '../drills/types';
+
 const KEY = 'hjkl:progress:v1';
 
 export interface Progress {
@@ -54,5 +56,26 @@ export function saveCoachPrefs(prefs: CoachPrefs): void {
     localStorage.setItem(COACH_KEY, JSON.stringify(prefs));
   } catch {
     // Not critical: the coach just won't auto-start next time.
+  }
+}
+
+const GENERATED_KEY = 'hjkl:generated:v1';
+
+/** AI-written drills, stored as authored definitions per lesson id. */
+export type GeneratedStore = Record<string, DrillDef[]>;
+
+export function loadGenerated(): GeneratedStore {
+  try {
+    return JSON.parse(localStorage.getItem(GENERATED_KEY) ?? '{}') as GeneratedStore;
+  } catch {
+    return {};
+  }
+}
+
+export function saveGenerated(store: GeneratedStore): void {
+  try {
+    localStorage.setItem(GENERATED_KEY, JSON.stringify(store));
+  } catch {
+    // Generated drills just won't survive a reload.
   }
 }

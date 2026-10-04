@@ -32,6 +32,8 @@ export interface Drill {
   goalCursor: number | null;
   solution: string[];
   par: number;
+  /** Written by the AI coach rather than by hand. */
+  generated?: boolean;
 }
 
 export interface LessonDef {

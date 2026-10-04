@@ -7,7 +7,8 @@ export interface ChatMessage {
 
 export type ToWorker =
   | { type: 'load'; model: ModelKey }
-  | { type: 'generate'; id: number; messages: ChatMessage[]; maxTokens: number }
+  /** `sample` adds randomness, so repeated drill requests don't all come out the same. */
+  | { type: 'generate'; id: number; messages: ChatMessage[]; maxTokens: number; sample: boolean }
   | { type: 'abort' };
 
 export type FromWorker =

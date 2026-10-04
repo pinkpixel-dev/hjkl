@@ -7,9 +7,15 @@ export type CoachState =
   | { status: 'ready'; model: ModelKey; dtype: CoachDtype; tokensPerSecond: number | null }
   | { status: 'error'; model: ModelKey; message: string };
 
+export interface Reply {
+  text: string;
+  /** True if a newer request (or turning the coach off) cut this one short. */
+  aborted: boolean;
+}
+
 interface Pending {
   onToken(text: string): void;
-  resolve(text: string): void;
+  resolve(reply: Reply): void;
   text: string;
 }
 
@@ -24,6 +30,7 @@ export class CoachClient {
   private nextId = 1;
   private pending = new Map<number, Pending>();
   private listeners = new Set<(s: CoachState) => void>();
+  private idleWaiters: (() => void)[] = [];
   state: CoachState = { status: 'off' };
 
   subscribe(fn: (s: CoachState) => void): () => void {
@@ -53,28 +60,50 @@ export class CoachClient {
   disable(): void {
     this.worker?.terminate();
     this.worker = null;
-    this.pending.forEach((p) => p.resolve(p.text));
-    this.pending.clear();
+    this.settleAll();
     this.set({ status: 'off' });
   }
 
-  /** Streams a reply. Resolves with the full text, or partial text if it was aborted. */
-  ask(messages: ChatMessage[], onToken: (text: string) => void, maxTokens = 120): Promise<string> {
-    if (!this.ready) return Promise.resolve('');
+  /** Streams a reply. Starting a new request aborts the one in flight. */
+  ask(
+    messages: ChatMessage[],
+    onToken: (text: string) => void,
+    { maxTokens = 120, sample = false }: { maxTokens?: number; sample?: boolean } = {},
+  ): Promise<Reply> {
+    if (!this.ready) return Promise.resolve({ text: '', aborted: true });
     this.abort();
     const id = this.nextId++;
     return new Promise((resolve) => {
       this.pending.set(id, { onToken, resolve, text: '' });
-      this.send({ type: 'generate', id, messages, maxTokens });
+      this.send({ type: 'generate', id, messages, maxTokens, sample });
     });
   }
 
-  /** Stops the current reply and drops its remaining tokens. */
+  /** Stops the current reply. Its promise resolves with whatever text had arrived. */
   abort(): void {
     if (!this.pending.size) return;
     this.send({ type: 'abort' });
-    this.pending.forEach((p) => p.resolve(p.text));
+    this.settleAll();
+  }
+
+  /** Resolves once nothing is generating, so background work can wait its turn. */
+  whenIdle(): Promise<void> {
+    if (!this.pending.size) return Promise.resolve();
+    return new Promise((resolve) => this.idleWaiters.push(resolve));
+  }
+
+  private settleAll(aborted = true) {
+    this.pending.forEach((p) => p.resolve({ text: p.text, aborted }));
     this.pending.clear();
+    this.flushIdle();
+  }
+
+  private flushIdle() {
+    if (this.pending.size) return;
+    const waiters = this.idleWaiters;
+    this.idleWaiters = [];
+    // Let the caller that finished react first, then wake background work.
+    setTimeout(() => waiters.forEach((w) => w()));
   }
 
   private send(msg: ToWorker) {
@@ -105,7 +134,8 @@ export class CoachClient {
       case 'done': {
         const p = this.pending.get(msg.id);
         this.pending.delete(msg.id);
-        p?.resolve(p.text);
+        p?.resolve({ text: p.text, aborted: false });
+        this.flushIdle();
         if (this.state.status === 'ready' && msg.tokensPerSecond > 0) {
           this.set({ ...this.state, tokensPerSecond: msg.tokensPerSecond });
         }
@@ -118,8 +148,7 @@ export class CoachClient {
           this.set({ status: 'error', model, message: msg.message });
         } else {
           console.error('Coach generation failed:', msg.message);
-          this.pending.forEach((p) => p.resolve(p.text));
-          this.pending.clear();
+          this.settleAll();
         }
         break;
     }

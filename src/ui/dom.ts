@@ -1,4 +1,5 @@
 import { createElement, type IconNode } from 'lucide';
+import { friendlyKey } from '../drills/keys';
 
 type Attrs = Record<string, string | number | boolean | EventListener | undefined>;
 type Child = Node | string | null | undefined | false;
@@ -30,7 +31,14 @@ export function icon(node: IconNode, size = 16): SVGElement {
   return svg;
 }
 
+/** One key as a <kbd>. Special keys keep their vim notation with a plain name underneath. */
+export function keyChip(key: string, display: (k: string) => string = (k) => k): HTMLElement {
+  const friendly = friendlyKey(key);
+  if (!friendly) return h('kbd', {}, display(key));
+  return h('kbd', { class: 'kbd-named', title: friendly }, display(key), h('small', {}, friendly));
+}
+
 /** Renders a key sequence as <kbd> chips. */
 export function keyChips(keys: readonly string[], display: (k: string) => string): HTMLElement {
-  return h('span', { class: 'chips' }, ...keys.map((k) => h('kbd', {}, display(k))));
+  return h('span', { class: 'chips' }, ...keys.map((k) => keyChip(k, display)));
 }

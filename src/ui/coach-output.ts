@@ -1,10 +1,10 @@
 import { Sparkles } from 'lucide';
-import { h, icon } from './dom';
+import { h, icon, keyChip } from './dom';
 
 /** Renders streamed coach text, turning `backticked` spans into <kbd> chips. */
 function renderText(text: string): Node[] {
   return text.split(/(`[^`]*`)/g).flatMap((part): Node[] => {
-    if (part.startsWith('`') && part.endsWith('`') && part.length > 2) return [h('kbd', {}, part.slice(1, -1))];
+    if (part.startsWith('`') && part.endsWith('`') && part.length > 2) return [keyChip(part.slice(1, -1))];
     return part ? [document.createTextNode(part.replace(/`/g, ''))] : [];
   });
 }

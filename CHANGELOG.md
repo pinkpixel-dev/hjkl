@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.0 - October 3, 2026
+
+### ✨ AI drills
+
+- **5 more** button on each lesson while the coach is on. Gemma writes fresh text, the app reuses the lesson's own key patterns on it, and every drill is played in real vim before it's kept
+- Gemma writes the instruction too, with a plain fallback whenever its wording doesn't match the change
+- AI drills show as dashed dots, are saved in the browser, and can be stopped mid-batch
+- Coach feedback and hints take priority over a running batch
+
+### ⌨️ Keys
+
+- Special keys show their plain name under the vim notation (`<CR>` → Enter, `<Esc>` → Escape) in the cheat sheet, key counter, answers and coach replies
+
+### 🚀 Deploy
+
+- `wrangler.jsonc` and `npm run deploy` for Cloudflare Workers static assets
+- The ONNX Runtime wasm is left out of the build and loaded from jsDelivr, keeping every file under Cloudflare's 25 MiB limit
+
+### 🐛 Fixes
+
+- Checking a drill offscreen no longer touches your live vim registers or search
+- The goal pane highlights only the lines that actually change
+
+### 🏷️ Versioning
+
+- Bumped to 0.4.0
+
 ## 0.3.0 - October 3, 2026
 
 ### 📚 Drills

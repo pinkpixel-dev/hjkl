@@ -35,3 +35,25 @@ export function eventToKey(e: KeyboardEvent): string | null {
 export function displayKey(key: string): string {
   return key === ' ' ? '␣' : key;
 }
+
+const FRIENDLY: Record<string, string> = {
+  '<CR>': 'Enter',
+  '<Esc>': 'Escape',
+  '<BS>': 'Backspace',
+  '<Del>': 'Delete',
+  '<Tab>': 'Tab',
+  '<Left>': 'Left',
+  '<Right>': 'Right',
+  '<Up>': 'Up',
+  '<Down>': 'Down',
+  '<Home>': 'Home',
+  '<End>': 'End',
+  ' ': 'Space',
+};
+
+/** Plain-English name for keys whose vim notation isn't obvious, e.g. `<CR>` → `Enter`. */
+export function friendlyKey(key: string): string | null {
+  if (FRIENDLY[key]) return FRIENDLY[key];
+  const ctrl = key.match(/^<C-(.+)>$/);
+  return ctrl ? `Ctrl+${ctrl[1].length === 1 ? ctrl[1].toUpperCase() : ctrl[1]}` : null;
+}

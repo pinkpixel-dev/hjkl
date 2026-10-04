@@ -55,3 +55,45 @@ export function hintMessages(drill: Drill, lesson: Lesson, keysSoFar: readonly s
     },
   ];
 }
+
+const TOPICS = [
+  'a JavaScript config object', 'a Python function call', 'a shopping list', 'a todo note',
+  'a CSS rule', 'a git commit message', 'a recipe step', 'a server log line', 'a JSON setting',
+  'a short note to a friend', 'an HTML tag with an attribute', 'a SQL query', 'a game score line',
+];
+
+/** Asks for fresh buffer text in the same style as the lesson's own drills. Keys are the app's job. */
+export function drillTextMessages(lesson: Lesson, random: () => number = Math.random): ChatMessage[] {
+  const topic = TOPICS[Math.floor(random() * TOPICS.length)];
+  const examples = lesson.drills
+    .filter((d) => !d.generated)
+    .slice(0, 3)
+    .map((d) => d.startText)
+    .join('\n---\n');
+  return [
+    { role: 'system', content: 'You write tiny snippets of text for vim practice. Reply with only the snippet.' },
+    {
+      role: 'user',
+      content: [
+        `Write 1 or 2 short lines (under 40 characters each) of ${topic}.`,
+        'Use plain words and, where it fits, quotes, parentheses or brackets.',
+        `Similar in size to these:\n${examples}`,
+        'Reply with only the lines. No explanation, no code fences.',
+      ].join('\n\n'),
+    },
+  ];
+}
+
+/** Asks for a short instruction for an edit the app already knows happened. */
+export function drillPromptMessages(before: string, after: string): ChatMessage[] {
+  return [
+    { role: 'system', content: 'You write very short instructions for vim practice drills. Reply with only the instruction.' },
+    {
+      role: 'user',
+      content: [
+        `Before:\n${before}\n\nAfter:\n${after}`,
+        'Write a 2 to 5 word instruction for this edit, naming the word that changes. Examples: "Paint it blue", "Delete the extra word", "Drop the comment".',
+      ].join('\n\n'),
+    },
+  ];
+}

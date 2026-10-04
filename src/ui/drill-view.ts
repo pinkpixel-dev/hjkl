@@ -5,6 +5,7 @@ import type { Drill } from '../drills/types';
 import { h, icon, keyChips } from './dom';
 import { renderGoal } from './goal-view';
 import { CoachOutput } from './coach-output';
+import { Pager } from './pager';
 
 const GRADE_TEXT: Record<Grade, string> = {
   under: 'Under par. Nice.',
@@ -17,6 +18,8 @@ export interface DrillViewHandlers {
   onNext(): void;
   onPick(drillIndex: number): void;
   onHint(): void;
+  onMore(): void;
+  onStopMore(): void;
 }
 
 /** The center panel: prompt, editor slot, goal, live keys and result. */
@@ -25,7 +28,7 @@ export class DrillView {
   readonly editorSlot = h('div', { class: 'editor-slot' });
   private heading = h('h1', { class: 'drill-prompt' });
   private crumbs = h('p', { class: 'drill-crumbs' });
-  private pager = h('nav', { class: 'pager', 'aria-label': 'Drills in this lesson' });
+  readonly pager: Pager;
   private goalSlot = h('div', { class: 'goal-slot' });
   private counter = h('span', { class: 'counter', 'aria-live': 'off' });
   private liveKeys = h('div', { class: 'live-keys' });
@@ -36,7 +39,8 @@ export class DrillView {
   private hintBtn: HTMLButtonElement;
   private drill: Drill | null = null;
 
-  constructor(private handlers: DrillViewHandlers) {
+  constructor(handlers: DrillViewHandlers) {
+    this.pager = new Pager(handlers.onPick, handlers.onMore, handlers.onStopMore);
     this.nextBtn = h(
       'button',
       { class: 'btn btn-primary', title: 'Next drill (Enter after solving)', onclick: () => handlers.onNext() },
@@ -65,7 +69,7 @@ export class DrillView {
     this.root = h(
       'div',
       { class: 'drill' },
-      h('header', { class: 'drill-head' }, h('div', {}, this.crumbs, this.heading), this.pager),
+      h('header', { class: 'drill-head' }, h('div', {}, this.crumbs, this.heading), this.pager.root),
       h(
         'div',
         { class: 'panes' },
@@ -91,17 +95,7 @@ export class DrillView {
     this.hintBtn.disabled = false;
     this.coach.clear();
     this.answer.replaceChildren(h('span', { class: 'faint' }, 'Reference'), keyChips(drill.solution, displayKey));
-    this.pager.replaceChildren(
-      ...drills.map((d, i) =>
-        h('button', {
-          class: `dot${i === drillIndex ? ' is-current' : ''}${bestById[d.id] !== undefined ? ' is-done' : ''}`,
-          title: `Drill ${i + 1}: ${d.prompt}`,
-          'aria-label': `Drill ${i + 1}`,
-          'aria-current': i === drillIndex ? 'step' : undefined,
-          onclick: () => this.handlers.onPick(i),
-        }),
-      ),
-    );
+    this.pager.render(drills, drillIndex, bestById);
     this.updateKeys([]);
   }
 
@@ -127,7 +121,7 @@ export class DrillView {
     );
     this.result.hidden = false;
     this.answer.hidden = true;
-    this.pager.querySelector('.dot.is-current')?.classList.add('is-done');
+    this.pager.markCurrentDone();
     this.hintBtn.disabled = true;
     this.nextBtn.focus();
   }

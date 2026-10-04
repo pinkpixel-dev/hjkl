@@ -24,7 +24,7 @@ function pressPromptKey(input: HTMLInputElement, keyCode: number) {
 }
 
 /** Feed keys through vim the same way a keyboard would, including typing into the / prompt. */
-export function runKeys(view: EditorView, keys: string[]): void {
+export function runKeys(view: EditorView, keys: readonly string[]): void {
   const cm = getCM(view);
   if (!cm) return;
   for (const key of keys) {
@@ -46,27 +46,48 @@ export function runKeys(view: EditorView, keys: string[]): void {
 }
 
 /**
- * Run keys against a drill in a detached editor and report whether they solve it.
- * Used by tests and to check AI-generated drills before they reach the player.
+ * vim keeps registers, search, jump list and the last insert (for `.`) in one global object.
+ * Checking a drill offscreen must not touch the learner's live state, so run it in a fresh
+ * state and put theirs back afterwards.
  */
-export function verifyDrill(drill: Drill, keys: string[] = drill.solution): boolean {
-  // Mounted offscreen rather than detached: j/k need real layout to measure lines.
+function withIsolatedVimState<T>(fn: () => T): T {
+  const saved = { ...Vim.getVimGlobalState_() };
+  Vim.resetVimGlobalState_();
+  try {
+    return fn();
+  } finally {
+    Object.assign(Vim.getVimGlobalState_(), saved);
+  }
+}
+
+/**
+ * Plays keys from a starting buffer in an offscreen editor and returns where it ends up.
+ * Mounted offscreen rather than detached: j/k need real layout to measure lines.
+ */
+export function playKeys(text: string, cursor: number, keys: readonly string[]): EditorSnapshot {
   const parent = document.createElement('div');
   parent.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;visibility:hidden';
   document.body.append(parent);
   const view = new EditorView({
     parent,
     state: EditorState.create({
-      doc: drill.startText,
-      selection: EditorSelection.cursor(drill.startCursor),
+      doc: text,
+      selection: EditorSelection.cursor(Math.min(cursor, text.length)),
       extensions: [vim(), history()],
     }),
   });
   try {
-    runKeys(view, keys);
-    return isSolved(drill, snapshot(view));
+    return withIsolatedVimState(() => {
+      runKeys(view, keys);
+      return snapshot(view);
+    });
   } finally {
     view.destroy();
     parent.remove();
   }
+}
+
+/** True if the keys solve the drill. Used by tests to prove every reference solution works. */
+export function verifyDrill(drill: Drill, keys: readonly string[] = drill.solution): boolean {
+  return isSolved(drill, playKeys(drill.startText, drill.startCursor, keys));
 }
