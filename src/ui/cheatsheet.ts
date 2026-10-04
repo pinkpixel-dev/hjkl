@@ -1,23 +1,21 @@
+import { BookOpen } from 'lucide';
 import type { Lesson } from '../drills/types';
-import { h, keyChip } from './dom';
+import { h, icon } from './dom';
+import { commandTable } from './reference';
 
-export function renderCheatsheet(container: HTMLElement, lesson: Lesson): void {
-  const rows = lesson.commands.map((c) =>
-    h(
-      'tr',
-      {},
-      h('td', {}, keyChip(c.keys)),
-      h('td', { class: 'cmd-name' }, c.name),
-      h('td', { class: 'cmd-vscode' }, c.vscode ?? h('span', { class: 'faint', title: 'No VS Code equivalent' }, '—')),
-    ),
-  );
+export function renderCheatsheet(container: HTMLElement, lesson: Lesson, onOpenAll: () => void): void {
   container.replaceChildren(
-    h('h2', { class: 'side-heading' }, 'Cheat sheet'),
     h(
-      'table',
-      { class: 'cheatsheet' },
-      h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, 'Vim'), h('th', { scope: 'col' }, 'Does'), h('th', { scope: 'col' }, 'VS Code'))),
-      h('tbody', {}, ...rows),
+      'div',
+      { class: 'side-head' },
+      h('h2', { class: 'side-heading' }, 'Cheat sheet'),
+      h(
+        'button',
+        { class: 'btn btn-ghost', type: 'button', title: 'Every command from every lesson', onclick: onOpenAll },
+        icon(BookOpen, 14),
+        'All commands',
+      ),
     ),
+    commandTable(lesson.commands),
   );
 }

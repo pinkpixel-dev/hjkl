@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.5.0 - October 4, 2026
+
+### 📚 Lessons
+
+- 7 new lessons and 50 new drills, for 17 lessons and 124 drills total
+- **File jumps:** `gg`, `G`, `^`, `%`, `{`, `}`
+- **Small fixes:** `r`, `R`, `s`, `S`, `J`, `~`, `Ctrl-a`, `Ctrl-x`
+- **Text objects:** `aw`, `a"`, `i'`, `i{`, `a(`, `a[`, `ap`
+- **Combos:** counts on motions, `c2w`, `d0`, `dj`, `>>`, `gU`
+- **Find backward:** `F`, `T`, `,`, `?`, `N`, `#`
+- **Substitute:** `:s` and `:%s`, with and without `g`
+- **Macros:** `qa`, `q`, `@a`, `@@`, and named registers
+
+### 📖 Cheat sheet
+
+- **All commands** opens a reference with every lesson's commands, filterable by key, action, or VS Code shortcut. It goes full screen on phones.
+
+### 🤖 Coach and AI drills
+
+- The coach now reads `gg`, `gU`, `>>`, `:s/…/…/`, macros, registers and `R` as whole commands instead of loose keys
+- AI drills work for the new lessons too, including `:s` drills aimed at words in the new text
+
+### 🐛 Fixes
+
+- The drill checker types over text after `R`, the same way the live editor does
+
 ## 0.4.0 - October 3, 2026
 
 ### ✨ AI drills

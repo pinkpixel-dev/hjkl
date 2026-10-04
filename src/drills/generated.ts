@@ -35,13 +35,20 @@ export interface Candidate {
     | { kind: 'move'; landOn: string; at: 'start' | 'end' | 'inside' | 'char'; char: string };
 }
 
-type Swap = (original: string, kind: 'typed' | 'search') => string;
+type Swap = (original: string, kind: 'typed' | 'search' | 'pattern') => string;
 
 /** Turns groups back into raw keys, swapping typed text and search terms via `swap`. */
 function rebuild(groups: KeyGroup[], swap: Swap): string[] {
   return groups.flatMap((g) => {
     if (g.kind === 'typed') return [...swap(g.text, 'typed')];
     if (/^[/?].+<CR>$/.test(g.keys)) return parseKeys(`${g.keys[0]}${swap(g.keys.slice(1, -4), 'search')}<CR>`);
+    // `:s/old/new/g`: aim the pattern at a word in the new text. Punctuation patterns stay as they are.
+    const sub = g.keys.match(/^:(%?)s\/([^/]*)\/([^/]*)\/(g?)<CR>$/);
+    if (sub) {
+      const [, range, from, to, flags] = sub;
+      const pattern = /[A-Za-z]/.test(from) ? swap(from, 'pattern') : from;
+      return parseKeys(`:${range}s/${pattern}/${to && swap(to, 'typed')}/${flags}<CR>`);
+    }
     return Array.from({ length: g.count }, () => parseKeys(g.keys)).flat();
   });
 }
@@ -79,11 +86,12 @@ export function buildFromText(
     const keys = rebuild(template, (original, kind) => {
       // Search terms only need a short prefix of a word that's in the buffer.
       if (kind === 'search') return pick(pool).slice(0, 3);
+      if (kind === 'pattern') return pick(pool);
       // Typed words become words from the new text; punctuation like `;` or `)` stays as it was.
       return original.replace(/[A-Za-z]{2,}(?: [A-Za-z]+)*/, () => pick(pool));
     });
     const editing = template.some(
-      (g) => g.kind === 'typed' || (g.kind === 'command' && /^\d*[dcxpPsSCDUoOAIyY>]/.test(g.keys)),
+      (g) => g.kind === 'typed' || (g.kind === 'command' && /^\d*([dcxpPsSCDUoOAIyYJrR~>:]|g[Uu~]|<C-[ax]>)/.test(g.keys)),
     );
 
     const end = playKeys(text, cursor, keys);

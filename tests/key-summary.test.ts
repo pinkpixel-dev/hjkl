@@ -74,3 +74,27 @@ describe('search and visual mode', () => {
     expect(groups('viwU').map((g) => (g.kind === 'command' ? g.keys : g.text))).toEqual(['v', 'i', 'w', 'U']);
   });
 });
+
+describe('jumps, ex commands, macros and registers', () => {
+  const keysOf = (notation: string) => groups(notation).map((g) => (g.kind === 'command' ? g.keys : `"${g.text}"`));
+
+  test('g commands and operators stay whole', () => {
+    expect(keysOf('ggdgg')).toEqual(['gg', 'dgg']);
+    expect(keysOf('gUw3>>')).toEqual(['gUw', '3>>']);
+  });
+
+  test('an ex command is one group', () => {
+    expect(keysOf(':%s/x/y/g<CR>')).toEqual([':%s/x/y/g<CR>']);
+    expect(describeKeys(parseKeys(':s/a/b/<CR>'))).toBe(':s/a/b/<CR> (ex command)');
+  });
+
+  test('recording a macro', () => {
+    expect(keysOf('qaI"<Esc>jq2@a@@')).toEqual(['qa', 'I', '"""', '<Esc>', 'j', 'q', '2@a', '@@']);
+    expect(describeKeys(parseKeys('qbq@b'))).toBe('qb (record macro into b), q (stop recording), @b (play macro b)');
+  });
+
+  test('registers and replace mode', () => {
+    expect(keysOf('"ayy"ap')).toEqual(['"a', 'yy', '"a', 'p']);
+    expect(keysOf('R2026<Esc>')).toEqual(['R', '"2026"', '<Esc>']);
+  });
+});

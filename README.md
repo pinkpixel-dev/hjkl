@@ -8,12 +8,12 @@ Try it at **https://hjkl.pinkpixel.dev** (desktop browser with a keyboard).
 
 ## What's in it right now
 
-- 10 lessons and 74 hand-written drills, covering movement, insert mode, word and line jumps, delete, change, copy and paste, dot-repeat, `f`/`t` finds, search, and visual mode
+- 17 lessons and 124 hand-written drills. They start with movement and insert mode, then work through word and line jumps, file jumps (`gg`, `G`, `%`, `{`/`}`), small fixes (`r`, `R`, `J`, `~`, `Ctrl-a`), delete, change, text objects, copy and paste, dot-repeat, `f`/`t` finds, counts and combos, search forward and backward, visual mode, `:s` substitutions, and macros and registers
 - A real vim editor in the browser (CodeMirror 6 with `@replit/codemirror-vim`)
 - Two kinds of drills: move the cursor to a highlighted character, or edit the buffer until it matches the goal
 - A live keystroke counter with every key you press, graded against par
 - The reference solution after each drill, so you can see the shorter path
-- A cheat sheet for the current lesson with the closest VS Code shortcut for each command
+- A cheat sheet for the current lesson with the closest VS Code shortcut for each command. **All commands** opens a full reference of every lesson's commands, and you can filter it by key, action, or VS Code shortcut.
 - A Review list at the top of the sidebar with every drill you've solved but not at par yet, worst first. Hit par and it drops off.
 - Progress saved in your browser, so you pick up where you left off
 
@@ -78,10 +78,6 @@ ONNX Runtime's wasm file (about 27 MB) is left out of the build on purpose. It's
 ## Special keys
 
 Keys like `<CR>` and `<Esc>` are vim's own notation. Everywhere they show up in the app, the plain name sits underneath: `<CR>` is Enter, `<Esc>` is Escape, `<BS>` is Backspace.
-
-## Known quirks
-
-- `dd` on the last line followed by `P` leaves an extra blank line. That's a bug in the vim plugin, not in your keystrokes. Real vim doesn't do this. None of the drills depend on it.
 
 ## License
 

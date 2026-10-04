@@ -22,6 +22,7 @@ import type { ChatMessage } from './ai/protocol';
 import { DrillView } from './ui/drill-view';
 import { renderSidebar } from './ui/sidebar';
 import { renderCheatsheet } from './ui/cheatsheet';
+import { createReference } from './ui/reference';
 import { renderCoachPanel } from './ui/coach-panel';
 import { h } from './ui/dom';
 
@@ -144,13 +145,14 @@ export function startApp(root: HTMLElement): void {
 
   const editor = createVimEditor(view.editorSlot, onChange);
   const tracker = new KeystrokeTracker(editor.view.dom, (keys) => view.updateKeys(keys));
+  const reference = createReference(lessons, () => editor.focus());
 
   function refreshChrome() {
     const drill = current();
     const reviewCount = buildReview(lessons, progress.best).length;
     const currentId = place === 'review' ? 'review' : lessons[place].id;
     renderSidebar(sidebar, lessons, progress, currentId, reviewCount, (i) => openDrill(i, 0), openReview);
-    renderCheatsheet(cheatsheetSlot, homeLesson(drill));
+    renderCheatsheet(cheatsheetSlot, homeLesson(drill), () => reference.open());
     const total = lessons.reduce((n, l) => n + l.drills.length, 0);
     score.textContent = `${Object.keys(progress.best).length} / ${total} solved`;
   }

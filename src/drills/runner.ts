@@ -41,6 +41,8 @@ export function runKeys(view: EditorView, keys: readonly string[]): void {
     const handled = Vim.handleKey(cm, key, 'user');
     if (handled || !cm.state.vim?.insertMode) continue;
     if (key === '<CR>') cm.replaceSelection('\n');
+    // R turns on overwrite. The plugin's keydown handler types over text the same way.
+    else if (key.length === 1 && cm.state.overwrite) cm.overWriteSelection(key);
     else if (key.length === 1) cm.replaceSelection(key);
   }
 }
