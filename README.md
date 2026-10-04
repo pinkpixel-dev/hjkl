@@ -4,6 +4,8 @@ hjkl is a browser app for learning vim through short drills. Each drill gives yo
 
 I'm building it for my husband. He uses VS Code every day, and he's tried to learn vim a few times, but it always ends the same way: too many commands to remember, and everything feels slow and awkward compared to what his hands already know. So instead of one long tutorial, hjkl teaches two or three commands at a time, shows the VS Code habit each one replaces, and lets you practice until it sticks.
 
+Try it at **https://hjkl.pinkpixel.dev** (desktop browser with a keyboard).
+
 ## What's in it right now
 
 - 10 lessons and 74 hand-written drills, covering movement, insert mode, word and line jumps, delete, change, copy and paste, dot-repeat, `f`/`t` finds, search, and visual mode
